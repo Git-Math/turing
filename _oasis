@@ -18,4 +18,4 @@ Executable ft_turing
    install: true
    MainIs: main.ml
    CompiledObject: native
-   BuildDepends: core, threads, yojson
+   BuildDepends: core, threads, getopt, yojson
