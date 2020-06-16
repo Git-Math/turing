@@ -18,4 +18,4 @@ Executable ft_turing
    install: true
    MainIs: main.ml
    CompiledObject: native
-   # BuildDepends: package_one, package_two
+   BuildDepends: yojson
