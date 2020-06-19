@@ -11,7 +11,7 @@ type transition_record =
     action : string;
   }
 
-module RecordMap = Map.Make(String)
+module TransitionsMap = Map.Make(String)
 
 type machine_record =
   {
@@ -21,10 +21,10 @@ type machine_record =
     states : string list;
     initial : string;
     finals : string list;
-    (*    transitions : (transition_record list) RecordMap.t;*)
+    (*    transitions : (transition_record list) TransitionsMap.t;*)
   }
 
-let parse_json json_filename =
+let create_machine json_filename =
   let json = Yojson.Basic.from_file json_filename in
   let machine =
     {
@@ -37,10 +37,23 @@ let parse_json json_filename =
     } in
   machine
 
-let () =
-  let json_filename = "machines/unary_sub.json" in
+let parse_json jsonf =
   let machine =
-    try parse_json json_filename
-    with e -> Printf.eprintf "Error while parsing json file %s: %s\nBacktrace:\n%s" json_filename (Exn.to_string e) (Printexc.get_backtrace ()); exit 1
-  in
-  printf "%s" machine.name
+    try create_machine jsonf
+    with e -> Printf.eprintf "Error while parsing json file %s: %s\nBacktrace:\n%s" jsonf (Exn.to_string e) (Printexc.get_backtrace ()); exit 1 in
+  machine
+
+let execute machine input =
+  let state = machine.initial
+  and i = 0 in
+  let rec loop i =
+    let trs = TransitionsMap.find state machine.transitions
+    and c = String.get input i in
+    let tr = List.fold ~f:(fun ret tr -> if tr.read = c then tr else ret) 0 trs in
+    Printf.printf "(%s, %c) -> (%s, %s, %s)" state c tr.name tr.write tr.action;
+    String.set input i tr.write;
+    if tr.action = "LEFT" then
+      loop (i-1)
+    else if tr.action = "RIGHT" then
+      loop (i+1)
+  in loop i
