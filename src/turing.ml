@@ -1,4 +1,5 @@
 open Core
+open Base
 open Yojson
 open Yojson.Basic.Util
 
@@ -11,7 +12,15 @@ type transition_record =
     action : string;
   }
 
-module TransitionsMap = Map.Make(String)
+module TransitionsMap = struct
+  module T = struct
+    type t = string
+    let compare x y = String.compare x y
+    let sexp_of_t = String.sexp_of_t
+  end
+  include T
+  include Comparable.Make(T)
+end
 
 type machine_record =
   {
@@ -21,39 +30,32 @@ type machine_record =
     states : string list;
     initial : string;
     finals : string list;
-    transitions : (transition_record list) TransitionsMap.t;
+    transitions : TransitionsMap.t;
   }
 
 let create_machine json_filename =
   let json = Yojson.Basic.from_file json_filename in
-  let machine =
-    let set_transitions json_transitions states =
-      let transitions = TransitionsMap.empty in
-      let set_transition_record json_transition_record =
-        {
-          read = member "read" json_transition_record |> to_string;
-          to_state = member "to_state" json_transition_record |> to_string;
-          scanright = member "scanright" json_transition_record |> to_string;
-          write = member "write" json_transition_record |> to_string;
-          action = member "action" json_transition_record |> to_string;
-        } in
-      let set_transitions_list state =
-        let json_transitions_list = member state json_transitions |> to_list in
-        List.map ~f:set_transition_record json_transitions_list in
-      let set_transitions_map state =
-        let transitions = TransitionsMap.add state set_transitions_list state transitions
-      List.iter ~f:set_transitions_map states;
-      transitions in
-    {
-      name = member "name" json |> to_string;
-      alphabet = member "alphabet" json |> to_list |> filter_string;
-      blank = member "blank" json |> to_string;
-      states = member "states" json |> to_list |> filter_string;
-      initial = member "initial" json |> to_string;
-      finals = member "finals" json |> to_list |> filter_string;
-      transitions = set_transitions (member "transitions" json) (member "states" json |> to_list |> filter_string)
+  let set_transitions json_transitions states =
+    let set_transition_record json_transition_record = {
+        read = member "read" json_transition_record |> to_string;
+        to_state = member "to_state" json_transition_record |> to_string;
+        scanright = member "scanright" json_transition_record |> to_string;
+        write = member "write" json_transition_record |> to_string;
+        action = member "action" json_transition_record |> to_string;
     } in
-  machine
+    let set_transitions_list state =
+      List.map ~f:set_transition_record (member state json_transitions |> to_list) in
+    let m = Map.empty (module TransitionsMap) in
+    List.iter ~f:(fun s -> Map.add ~key:s ~data:(set_transitions_list s) m; ()) states; m in
+  {
+    name = member "name" json |> to_string;
+    alphabet = member "alphabet" json |> to_list |> filter_string;
+    blank = member "blank" json |> to_string;
+    states = member "states" json |> to_list |> filter_string;
+    initial = member "initial" json |> to_string;
+    finals = member "finals" json |> to_list |> filter_string;
+    transitions = set_transitions (member "transitions" json) (member "states" json |> to_list |> filter_string)
+  }
 
 let parse_json jsonf =
   let machine =
