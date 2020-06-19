@@ -1,4 +1,5 @@
 open Core
+open Turing
 
 let usage () =
   Printf.printf "usage: %s [-h] jsonfile input\n" Sys.argv.(0);
@@ -8,18 +9,18 @@ let usage () =
   Printf.printf "  input                     input of the machine\n";
   Printf.printf "\n";
   Printf.printf "optional arguments:\n";
-  Printf.printf "  -h, --help                show this help message and exit\n";
-  exit 0
+  Printf.printf "  -h, --help                show this help message and exit\n"
 
 let () =
   for i = 1 to Array.length Sys.argv - 1 do
-    if Sys.argv.(i) = "-h" || Sys.argv.(i) = "--help" then
-      usage ()
+    if Sys.argv.(i) = "-h" || Sys.argv.(i) = "--help" then begin
+      usage (); exit 1
+    end
   done;
-  if Array.length Sys.argv <> 3 then
-    usage ();
-
+  if Array.length Sys.argv <> 3 then begin
+    usage (); exit 1
+  end;
   let jsonf = Sys.argv.(1)
   and input = Sys.argv.(2) in
-  Printf.printf "jsonf=%s" jsonf;
-  Printf.printf "input=%s" input;;
+  let machine = Turing.parse_json jsonf in
+  Turing.execute machine input
