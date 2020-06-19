@@ -42,6 +42,8 @@ let parse_json json_filename =
 
 let () =
   let json_filename = "machines/unary_sub.json" in
-  (*try*) let machine = parse_json json_filename in
+  let machine =
+    try parse_json json_filename
+    with e -> Printf.eprintf "Error while parsing json file %s: %s\nBacktrace:\n%s" json_filename (Exn.to_string e) (Printexc.get_backtrace ()); exit 1
+  in
   printf "%s" machine.name
-                     (*with e -> Printf.eprintf "Error while parsing json file %s: %s\nBacktrace:\n%s" json_filename (Exn.to_string e) (Printexc.get_backtrace ()); exit 1*)
