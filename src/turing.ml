@@ -25,9 +25,7 @@ type machine_record =
   }
 
 let parse_json json_filename =
-  let json =
-    Yojson.Basic.from_file json_filename
-  in
+  let json = Yojson.Basic.from_file json_filename in
   let machine =
     {
       name = member "name" json |> to_string;
@@ -36,8 +34,7 @@ let parse_json json_filename =
       states = member "states" json |> to_list |> filter_string;
       initial = member "initial" json |> to_string;
       finals = member "finals" json |> to_list |> filter_string;
-    }
-  in
+    } in
   machine
 
 let () =
