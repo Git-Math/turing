@@ -41,8 +41,9 @@ let create_machine json_filename =
         let json_transitions_list = member state json_transitions |> to_list in
         List.map ~f:set_transition_record json_transitions_list in
       let set_transitions_map state =
-        TransitionsMap.add state (set_transitions_list state) transitions in
-      List.iter ~f:set_transitions_map states in
+        let transitions = TransitionsMap.add state set_transitions_list state transitions
+      List.iter ~f:set_transitions_map states;
+      transitions in
     {
       name = member "name" json |> to_string;
       alphabet = member "alphabet" json |> to_list |> filter_string;
