@@ -31,16 +31,17 @@ let parse_json json_filename =
   let machine =
     {
       name = member "name" json |> to_string;
-      alphabet = member "tags" json |> to_list |> filter_string;
+      alphabet = member "alphabet" json |> to_list |> filter_string;
       blank = member "blank" json |> to_string;
       states = member "states" json |> to_list |> filter_string;
       initial = member "initial" json |> to_string;
       finals = member "finals" json |> to_list |> filter_string;
     }
   in
-  printf "%s" machine.name
+  machine
 
 let () =
   let json_filename = "machines/unary_sub.json" in
-  try parse_json json_filename
-  with e -> Printf.eprintf "Error while parsing json file %s: %s\nBacktrace:\n%s" json_filename (Exn.to_string e) (Exn.get); exit 1
+  (*try*) let machine = parse_json json_filename in
+  printf "%s" machine.name
+                     (*with e -> Printf.eprintf "Error while parsing json file %s: %s\nBacktrace:\n%s" json_filename (Exn.to_string e) (Printexc.get_backtrace ()); exit 1*)
