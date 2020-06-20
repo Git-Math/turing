@@ -14,5 +14,5 @@ let print_machine machine =
   Core.Printf.printf "Finals : [ %s ]\n" (String.concat ~sep:", " machine.finals);
   let print_transition_list state =
     List.iter ~f:(print_transition state) (Map.find_exn machine.transitions state) in
-  List.iter ~f:print_transition_list (List.filter ~f:(fun x -> not(List.exists ~f:(fun y -> String.equal x y) machine.finals)) machine.states);
+  List.iter ~f:print_transition_list (List.filter ~f:(fun x -> not(List.exists ~f:(String.equal x) machine.finals)) machine.states);
   Core.Printf.printf "*****************************************************************************\n"

@@ -57,7 +57,7 @@ let create_machine json_filename =
     states = member "states" json |> to_list |> filter_string;
     initial = member "initial" json |> to_string;
     finals = member "finals" json |> to_list |> filter_string;
-    transitions = set_transitions (member "transitions" json) (member "states" json |> to_list |> filter_string |> List.filter ~f:(fun x -> not(List.exists ~f:(fun y -> String.equal x y) (member "finals" json |> to_list |> filter_string))))
+    transitions = set_transitions (member "transitions" json) (member "states" json |> to_list |> filter_string |> List.filter ~f:(fun x -> not(List.exists ~f:(String.equal x) (member "finals" json |> to_list |> filter_string))))
   }
 
 let parse_json jsonf =
