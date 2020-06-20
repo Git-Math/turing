@@ -1,5 +1,6 @@
 open Core
 open Turing
+open Print
 
 let usage () =
   Printf.printf "usage: %s [-h] jsonfile input\n" Sys.argv.(0);
@@ -23,4 +24,5 @@ let () =
   let jsonf = Sys.argv.(1)
   and input = Sys.argv.(2) in
   let machine = Turing.parse_json jsonf in
-  Turing.execute machine input
+  Print.print_machine machine
+  (*  Turing.execute machine input*)
