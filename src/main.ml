@@ -25,6 +25,8 @@ let () =
   let jsonf = Sys.argv.(1)
   and input = Sys.argv.(2) in
   let machine = Turing.parse_json jsonf in
-  try Print.print_machine machine
+  try
+    Turing.check_machine machine;
+    Print.print_machine machine
   with e -> Except.print_exception e
   (*  Turing.execute machine input*)

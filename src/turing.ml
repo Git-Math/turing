@@ -33,6 +33,16 @@ type machine_record =
     transitions : (TransitionsMap.t, transition_record Base.List.t, TransitionsMap.comparator_witness) Base.Map.t
   }
 
+let check_machine machine =
+  if (String.length machine.name) = 0
+  then Except.Invalid_Machine "Name must not be empty" |> raise;
+  let check_string_size_1 str =
+    if (String.length str) <> 1
+    then Except.Invalid_Machine "Character of the alphabet must be a string of length strictly equal to 1" |> raise in
+  List.iter ~f:check_string_size_1 machine.alphabet;
+  if not(List.exists ~f:(String.equal machine.blank) machine.alphabet)
+  then Except.Invalid_Machine "The blank character must be part of the alphabet" |> raise
+
 let create_machine json_filename =
   let json = Yojson.Basic.from_file json_filename in
   let set_transitions json_transitions states =
