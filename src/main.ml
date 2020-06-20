@@ -1,6 +1,7 @@
 open Core
 open Turing
 open Print
+open Except
 
 let usage () =
   Printf.printf "usage: %s [-h] jsonfile input\n" Sys.argv.(0);
@@ -24,5 +25,6 @@ let () =
   let jsonf = Sys.argv.(1)
   and input = Sys.argv.(2) in
   let machine = Turing.parse_json jsonf in
-  Print.print_machine machine
+  try Print.print_machine machine
+  with e -> Except.print_exception e
   (*  Turing.execute machine input*)

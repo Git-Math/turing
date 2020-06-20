@@ -2,6 +2,7 @@ open Core
 open Base
 open Yojson
 open Yojson.Basic.Util
+open Except
 
 type transition_record =
   {
@@ -62,7 +63,7 @@ let create_machine json_filename =
 let parse_json jsonf =
   let machine =
     try create_machine jsonf
-    with e -> Core.Printf.printf "Error while parsing json file %s: %s\nBacktrace:\n%s" jsonf (Exn.to_string e) (Core.Printexc.get_backtrace ()); Caml.exit 1 in
+    with e -> Except.print_exception e in
   machine
 
 (*let execute machine input =
