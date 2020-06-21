@@ -78,25 +78,28 @@ let parse_json jsonf =
 
 let execute machine tape =
   let rec solve state_history state tape i =
-    let trs_record = Map.find_exn machine.transitions state
-    and c = String.get tape i in
-    let tr_record = List.fold_left ~init:None ~f:(fun acc e ->
-      if Char.to_int (String.get e.read 0) = Char.to_int c
-      then Some e else acc
-    ) trs_record in
-    match tr_record with
-    | None -> Except.Invalid_Machine (Printf.sprintf "Can't find character `%c' in `state': `%s'" c state) |> raise
-    | Some r -> begin
-      Core.Printf.printf "[%s] (%s, %c) -> (%s, %s, %s)\n" tape state c r.to_state r.write r.action;
-      match Hashtbl.add state_history ~key:(String.concat ~sep:"-" [ state; Int.to_string i; tape ]) ~data:"" with
-      | `Duplicate -> Except.Invalid_Machine "Detect infinite loop. Stopping .." |> raise
-      | `Ok -> begin
-        let state = r.to_state
-        and tape = Bytes.of_string tape in
-        Base.Bytes.set tape i (String.get r.write 0);
-        match r.to_state with
-        | "HALT" -> Core.exit 0
-        | _ -> begin
+    match state with
+    | "HALT" -> begin
+        Core.Printf.printf "[%s]\n" tape;
+        Core.exit 0
+      end
+    | _ -> begin
+      let trs_record = Map.find_exn machine.transitions state
+      and c = String.get tape i in
+      let tr_record = List.fold_left ~init:None ~f:(fun acc e ->
+        if Char.to_int (String.get e.read 0) = Char.to_int c
+        then Some e else acc
+      ) trs_record in
+      match tr_record with
+      | None -> Except.Invalid_Machine (Printf.sprintf "Can't find character `%c' in `state': `%s'" c state) |> raise
+      | Some r -> begin
+        Core.Printf.printf "[%s] (%s, %c) -> (%s, %s, %s)\n" tape state c r.to_state r.write r.action;
+        match Hashtbl.add state_history ~key:(String.concat ~sep:"-" [ state; Int.to_string i; tape ]) ~data:"" with
+        | `Duplicate -> Except.Invalid_Machine "Detect infinite loop. Stopping .." |> raise
+        | `Ok -> begin
+          let state = r.to_state
+          and tape = Bytes.of_string tape in
+          Base.Bytes.set tape i (String.get r.write 0);
           let (tape, i) = match r.action with
           | "LEFT"  -> if i = 0
             then (String.concat [ machine.blank; (Base.Bytes.to_string tape) ], 0)
