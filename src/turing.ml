@@ -121,12 +121,12 @@ let parse_json jsonf =
 
 let execute machine tape =
   let rec solve state_history state tape i =
-    match state with
-    | "HALT" -> begin
+    if List.exists ~f:(String.equal state) machine.finals
+    then begin
         Core.Printf.printf "[%s]\n" tape;
         Core.exit 0
       end
-    | _ -> begin
+    else begin
       let trs_record = Map.find_exn machine.transitions state
       and c = String.get tape i in
       let tr_record = List.fold_left ~init:None ~f:(fun acc e ->
