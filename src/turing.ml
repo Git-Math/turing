@@ -2,36 +2,9 @@ open Core
 open Base
 open Yojson
 open Yojson.Basic.Util
+open Turing_types
 open Except
-
-type transition_record =
-  {
-    read : string;
-    to_state : string;
-    write : string;
-    action : string;
-  }
-
-module TransitionsMap = struct
-  module T = struct
-    type t = string
-    let compare x y = String.compare x y
-    let sexp_of_t = String.sexp_of_t
-  end
-  include T
-  include Comparable.Make(T)
-end
-
-type trs_record =
-  {
-    name : string;
-    alphabet : string list;
-    blank : string;
-    states : string list;
-    initial : string;
-    finals : string list;
-    transitions : (TransitionsMap.t, transition_record Base.List.t, TransitionsMap.comparator_witness) Base.Map.t
-  }
+open Print
 
 let check_machine machine =
   if (String.length machine.name) = 0
@@ -101,7 +74,7 @@ let create_machine json_filename =
       let state = (List.nth_exn states i) in
       if i < ((List.length states) - 1)
       then Map.add_exn ~key:state ~data:(set_transitions_list state) (set_transitions_map (i + 1))
-      else Map.add_exn ~key:state ~data:(set_transitions_list state) (Map.empty (module TransitionsMap)) in
+      else Map.add_exn ~key:state ~data:(set_transitions_list state) (Map.empty (module Turing_types.TransitionsMap)) in
     set_transitions_map 0 in
   {
     name = member "name" json |> to_string;
@@ -136,7 +109,7 @@ let execute machine tape =
       match tr_record with
       | None -> Except.Invalid_Machine (Printf.sprintf "Can't find character `%c' in `state': `%s'" c state) |> raise
       | Some r -> begin
-        Core.Printf.printf "[%s] (%s, %c) -> (%s, %s, %s)\n" tape state c r.to_state r.write r.action;
+        Print.print_machine_step tape i state r;
         match Hashtbl.add state_history ~key:(String.concat ~sep:"-" [ state; Int.to_string i; tape ]) ~data:"" with
         | `Duplicate -> Except.Invalid_Machine "Detect infinite loop. Stopping .." |> raise
         | `Ok -> begin
