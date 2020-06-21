@@ -12,7 +12,7 @@ let check_machine machine =
 
   let check_character_size_1 str =
     if (String.length str) <> 1
-    then Except.Invalid_Machine "Character of the alphabet must be a string of length strictly equal to 1" |> raise in
+    then Except.Invalid_Machine (Printf.sprintf "Character of the alphabet must be a string of length strictly equal to 1: [%s]" str) |> raise in
   List.iter ~f:check_character_size_1 machine.alphabet;
   if List.exists ~f:(String.equal "<") machine.alphabet
   then Except.Invalid_Machine "Character of the alphabet can't be [<]" |> raise;
@@ -20,7 +20,7 @@ let check_machine machine =
   then Except.Invalid_Machine "Character of the alphabet can't be [>]" |> raise;
 
   if not(List.exists ~f:(String.equal machine.blank) machine.alphabet)
-  then Except.Invalid_Machine "The blank character must be part of the alphabet" |> raise;
+  then Except.Invalid_Machine (Printf.sprintf "The blank character must be part of the alphabet: [%s]" machine.blank) |> raise;
 
   let check_state_not_empty str =
     if String.is_empty str
@@ -28,22 +28,22 @@ let check_machine machine =
   List.iter ~f:check_state_not_empty machine.states;
 
   if not(List.exists ~f:(String.equal machine.initial) machine.states)
-  then Except.Invalid_Machine "The initial state must be part of the states list" |> raise;
+  then Except.Invalid_Machine (Printf.sprintf "The initial state must be part of the states list: [%s]" machine.initial) |> raise;
 
   let check_final_state_in_states final_state =
     if not(List.exists ~f:(String.equal final_state) machine.states)
-    then Except.Invalid_Machine "The final states must be part of the states list" |> raise in
+    then Except.Invalid_Machine (Printf.sprintf "The final states must be part of the states list: [%s]" final_state) |> raise in
   List.iter ~f:check_final_state_in_states machine.finals;
 
   let check_transition machine_transition =
     if not(List.exists ~f:(String.equal machine_transition.read) machine.alphabet)
-    then Except.Invalid_Machine "Transition read must be part of the alphabet" |> raise;
+    then Except.Invalid_Machine (Printf.sprintf "Transition read must be part of the alphabet: [%s]" machine_transition.read) |> raise;
     if not(List.exists ~f:(String.equal machine_transition.to_state) machine.states)
-    then Except.Invalid_Machine "Transition to_state must be part of the states list" |> raise;
+    then Except.Invalid_Machine (Printf.sprintf "Transition to_state must be part of the states list: [%s]" machine_transition.to_state) |> raise;
     if not(List.exists ~f:(String.equal machine_transition.write) machine.alphabet)
-    then Except.Invalid_Machine "Transition write must be part of the alphabet" |> raise;
+    then Except.Invalid_Machine (Printf.sprintf "Transition write must be part of the alphabet: [%s]" machine_transition.write) |> raise;
     if not(String.equal machine_transition.action "LEFT") && not(String.equal machine_transition.action "RIGHT")
-    then Except.Invalid_Machine "Transition action must be either [LEFT] or [RIGHT]" |> raise in
+    then Except.Invalid_Machine (Printf.sprintf "Transition action must be either [LEFT] or [RIGHT]: [%s]" machine_transition.action) |> raise in
   let check_transition_list state =
     List.iter ~f:(check_transition) (Map.find_exn machine.transitions state) in
   List.iter ~f:check_transition_list (List.filter ~f:(fun x -> not(List.exists ~f:(String.equal x) machine.finals)) machine.states)
@@ -52,10 +52,10 @@ let check_input input machine =
   if String.is_empty input
   then Except.Invalid_Input "Input must not be empty" |> raise;
   if String.contains input (String.get machine.blank 0)
-  then Except.Invalid_Input "The blank character must not be part of the input" |> raise;
+  then Except.Invalid_Input (Printf.sprintf "The blank character must not be part of the input: [%s]" machine.blank) |> raise;
   let rec loop i =
     if not(List.exists ~f:(fun c -> (String.get c 0 |> Char.to_int) = (String.get input i |> Char.to_int)) machine.alphabet)
-    then Except.Invalid_Input "Input characters must be part of the alphabet" |> raise;
+    then Except.Invalid_Input (Printf.sprintf "Input characters must be part of the alphabet: [%c]" (String.get input i))|> raise;
     if i < (String.length input) - 1 then loop (i + 1) in
   loop 0
 
