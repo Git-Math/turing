@@ -75,6 +75,17 @@ let check_machine machine =
     List.iter ~f:(check_transition) (Map.find_exn machine.transitions state) in
   List.iter ~f:check_transition_list (List.filter ~f:(fun x -> not(List.exists ~f:(String.equal x) machine.finals)) machine.states)
 
+let check_input input machine =
+  if String.is_empty input
+  then Except.Invalid_Input "Input must not be empty" |> raise;
+  if String.contains input (String.get machine.blank 0)
+  then Except.Invalid_Input "The blank character must not be part of the input" |> raise;
+  let rec loop i =
+    if not(List.exists ~f:(fun c -> (String.get c 0 |> Char.to_int) = (String.get input i |> Char.to_int)) machine.alphabet)
+    then Except.Invalid_Input "Input characters must be part of the alphabet" |> raise;
+    if i < (String.length input) - 1 then loop (i + 1) in
+  loop 0
+
 let create_machine json_filename =
   let json = Yojson.Basic.from_file json_filename in
   let set_transitions json_transitions states =

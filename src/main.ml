@@ -27,7 +27,7 @@ let () =
   let machine = Turing.parse_json jsonf in
   try
     Turing.check_machine machine;
+    Turing.check_input input machine;
     Print.print_machine machine;
     Turing.execute machine input
   with e -> Except.print_exception e
-
