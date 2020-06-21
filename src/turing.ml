@@ -36,12 +36,44 @@ type machine_record =
 let check_machine machine =
   if (String.length machine.name) = 0
   then Except.Invalid_Machine "Name must not be empty" |> raise;
-  let check_string_size_1 str =
+
+  let check_character_size_1 str =
     if (String.length str) <> 1
     then Except.Invalid_Machine "Character of the alphabet must be a string of length strictly equal to 1" |> raise in
-  List.iter ~f:check_string_size_1 machine.alphabet;
+  List.iter ~f:check_character_size_1 machine.alphabet;
+  if List.exists ~f:(String.equal "<") machine.alphabet
+  then Except.Invalid_Machine "Character of the alphabet can't be [<]" |> raise;
+  if List.exists ~f:(String.equal ">") machine.alphabet
+  then Except.Invalid_Machine "Character of the alphabet can't be [>]" |> raise;
+
   if not(List.exists ~f:(String.equal machine.blank) machine.alphabet)
-  then Except.Invalid_Machine "The blank character must be part of the alphabet" |> raise
+  then Except.Invalid_Machine "The blank character must be part of the alphabet" |> raise;
+
+  let check_state_not_empty str =
+    if String.is_empty str
+    then Except.Invalid_Machine "State can't be empty" |> raise in
+  List.iter ~f:check_state_not_empty machine.states;
+
+  if not(List.exists ~f:(String.equal machine.initial) machine.states)
+  then Except.Invalid_Machine "The initial state must be part of the states list" |> raise;
+
+  let check_final_state_in_states final_state =
+    if not(List.exists ~f:(String.equal final_state) machine.states)
+    then Except.Invalid_Machine "The final states must be part of the states list" |> raise in
+  List.iter ~f:check_final_state_in_states machine.finals;
+
+  let check_transition machine_transition =
+    if not(List.exists ~f:(String.equal machine_transition.read) machine.alphabet)
+    then Except.Invalid_Machine "Transition read must be part of the alphabet" |> raise;
+    if not(List.exists ~f:(String.equal machine_transition.to_state) machine.states)
+    then Except.Invalid_Machine "Transition to_state must be part of the states list" |> raise;
+    if not(List.exists ~f:(String.equal machine_transition.write) machine.alphabet)
+    then Except.Invalid_Machine "Transition write must be part of the alphabet" |> raise;
+    if not(String.equal machine_transition.action "LEFT") && not(String.equal machine_transition.action "RIGHT")
+    then Except.Invalid_Machine "Transition action must be either [LEFT] or [RIGHT]" |> raise in
+  let check_transition_list state =
+    List.iter ~f:(check_transition) (Map.find_exn machine.transitions state) in
+  List.iter ~f:check_transition_list (List.filter ~f:(fun x -> not(List.exists ~f:(String.equal x) machine.finals)) machine.states)
 
 let create_machine json_filename =
   let json = Yojson.Basic.from_file json_filename in
