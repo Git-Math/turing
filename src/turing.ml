@@ -120,7 +120,7 @@ let execute machine tape =
           | "LEFT"  -> if i = 0
             then (String.concat [ machine.blank; (Base.Bytes.to_string tape) ], 0)
             else (Base.Bytes.to_string tape, i-1)
-          | "RIGHT" -> if i = (Base.Bytes.length tape)
+          | "RIGHT" -> if i = (Base.Bytes.length tape) - 1
             then (String.concat [ Base.Bytes.to_string tape; machine.blank ], i+1)
             else (Base.Bytes.to_string tape, i+1)
           | _ -> Except.Invalid_Machine (Printf.sprintf "Unknown `action': `%s'" r.action) |> raise in
