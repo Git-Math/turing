@@ -29,5 +29,9 @@ let () =
     Turing.check_machine machine;
     Turing.check_input input machine;
     Print.print_machine machine;
-    Turing.execute machine input
+    let rec add_blank input i =
+      if i > 0
+      then String.concat [input; add_blank machine.blank (i - 1)]
+      else machine.blank in
+    Turing.execute machine (add_blank input 13)
   with e -> Except.print_exception e
