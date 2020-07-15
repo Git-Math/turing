@@ -1,0 +1,35 @@
+{
+	"name" : "word0n1n",
+	"alphabet": [ "0", "1", "y", "n", "." ],
+	"blank"  : ".",
+	"states" : [ "erasefirst0", "scanright", "eraselast1", "scanleft", "scanrightn", "WORD0N1N", "NOT WORD0N1N" ],
+	"initial" : "erasefirst0",
+	"finals" : [ "WORD0N1N", "NOT WORD0N1N" ],
+	"transitions" : {
+		"erasefirst0": [
+			{ "read" : "0", "to_state": "scanright", "write": ".", "action": "RIGHT"},
+			{ "read" : "1", "to_state": "scanrightn", "write": "1", "action": "RIGHT"},
+			{ "read" : ".", "to_state": "WORD0N1N", "write": "y", "action": "RIGHT" }
+		],
+		"scanright": [
+			{ "read" : "0", "to_state": "scanright", "write": "0", "action": "RIGHT"},
+			{ "read" : "1", "to_state": "scanright", "write": "1", "action": "RIGHT"},
+			{ "read" : ".", "to_state": "eraselast1", "write": ".", "action": "LEFT" }
+		],
+		"eraselast1": [
+            { "read" : "0", "to_state": "scanrightn", "write": "0", "action": "RIGHT"},
+            { "read" : "1", "to_state": "scanleft", "write": ".", "action": "LEFT"},
+            { "read" : ".", "to_state": "NOT WORD0N1N", "write": "n", "action": "LEFT" }
+        ],
+        "scanleft": [
+            { "read" : "0", "to_state": "scanleft", "write": "0", "action": "LEFT"},
+            { "read" : "1", "to_state": "scanleft", "write": "1", "action": "LEFT"},
+            { "read" : ".", "to_state": "erasefirst0", "write": ".", "action": "RIGHT" }
+        ],
+		"scanrightn": [
+            { "read" : "0", "to_state": "scanrightn", "write": "0", "action": "RIGHT"},
+            { "read" : "1", "to_state": "scanrightn", "write": "1", "action": "RIGHT"},
+            { "read" : ".", "to_state": "NOT WORD0N1N", "write": "n", "action": "RIGHT" }
+        ]
+	}
+}
