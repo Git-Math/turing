@@ -1,5 +1,5 @@
 {
-	"name" : "unary_add",
+	"name" : "palindrome",
 	"alphabet": [ "a", "b", ".", "y", "n" ],
 	"blank"  : ".",
 	"states" : [ "first", "scanrighta", "scanrightb", "lasta", "lastb", "scanleft", "PALINDROME", "NOT PALINDROME" ],
