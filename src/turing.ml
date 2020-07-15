@@ -93,6 +93,7 @@ let parse_json jsonf =
   machine
 
 let execute machine tape =
+  let tape_base_size = String.length tape in
   let rec solve state_history state tape i =
     if List.exists ~f:(String.equal state) machine.finals
     then begin
@@ -124,7 +125,9 @@ let execute machine tape =
             then (String.concat [ Base.Bytes.to_string tape; machine.blank ], i+1)
             else (Base.Bytes.to_string tape, i+1)
           | _ -> Except.Invalid_Machine (Printf.sprintf "Unknown `action': `%s'" r.action) |> raise in
-          solve state_history state tape i
+          if String.length tape - tape_base_size >= 1000
+          then Except.Invalid_Machine "Detect infinite loop. Stopping .." |> raise
+          else solve state_history state tape i
         end
       end
     end
