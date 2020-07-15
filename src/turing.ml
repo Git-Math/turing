@@ -94,10 +94,11 @@ let parse_json jsonf =
 
 let execute machine tape =
   let tape_base_size = String.length tape in
-  let rec solve state_history state tape i =
+  let rec solve state_history state tape i time_complexity =
     if List.exists ~f:(String.equal state) machine.finals
     then begin
         Core.Printf.printf "[%s]\n" tape;
+        Core.Printf.printf "Time complexity: %d\n" time_complexity;
         Core.exit 0
       end
     else begin
@@ -127,8 +128,8 @@ let execute machine tape =
           | _ -> Except.Invalid_Machine (Printf.sprintf "Unknown `action': `%s'" r.action) |> raise in
           if String.length tape - tape_base_size >= 1000
           then Except.Invalid_Machine "Detect infinite loop. Stopping .." |> raise
-          else solve state_history state tape i
+          else solve state_history state tape i (time_complexity + 1)
         end
       end
     end
-  in solve (Hashtbl.create (module String)) machine.initial tape 0
+  in solve (Hashtbl.create (module String)) machine.initial tape 0 0
