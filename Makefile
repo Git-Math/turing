@@ -1,41 +1,58 @@
-# OASIS_START
-# DO NOT EDIT (digest: a3c674b4239234cbbe53afe090018954)
+NAME = turing
 
-SETUP = ocaml setup.ml
+SOURCES = src/except.ml src/turing_types.ml src/print.ml src/turing.ml src/main.ml
+DEP = -thread -package core -package yojson -package base -package core_kernel
 
-build: setup.data
-	$(SETUP) -build $(BUILDFLAGS)
+CAMLC = ocamlc
+CAMLOPT = ocamlopt
+CAMLDEP = ocamldep
+CAMLFIND = ocamlfind
 
-doc: setup.data build
-	$(SETUP) -doc $(DOCFLAGS)
+CFLAGS =
 
-test: setup.data build
-	$(SETUP) -test $(TESTFLAGS)
+all: depend $(NAME)
 
-all:
-	$(SETUP) -all $(ALLFLAGS)
+$(NAME): opt byt
+	ln -s $(NAME).byt $(NAME)
 
-install: setup.data
-	$(SETUP) -install $(INSTALLFLAGS)
+opt: $(NAME).opt
+byt: $(NAME).byt
 
-uninstall: setup.data
-	$(SETUP) -uninstall $(UNINSTALLFLAGS)
+OBJS = $(SOURCES:.ml=.cmo)
+OPTOBJS = $(SOURCES:.ml=.cmx)
 
-reinstall: setup.data
-	$(SETUP) -reinstall $(REINSTALLFLAGS)
+$(NAME).byt: $(OBJS)
+				$(CAMLFIND) $(CAMLC) -o $(NAME).byt -linkpkg $(DEP) $(OBJS)
+
+$(NAME).opt: $(OPTOBJS)
+				$(CAMLFIND) $(CAMLOPT) -o $(NAME).opt -linkpkg $(DEP) $(OPTOBJS)
+
+.SUFFIXES: .ml .mli .cmo .cmi .cmx
+
+.ml.cmo:
+	$(CAMLFIND) $(CAMLC) -I src $(DEP) $(CFLAGS) -c $<
+
+.mli.cmi:
+	$(CAMLFIND) $(CAMLC) -I src $(DEP) $(CFLAGS) -c $<
+
+.ml.cmx:
+	$(CAMLFIND) $(CAMLOPT) -I src $(DEP) $(CFLAGS) -c $<
 
 clean:
-	$(SETUP) -clean $(CLEANFLAGS)
+	rm -f .depend
+	rm -f src/*.cm[iox] src/*.opt src/*.o
+	rm -f src/$(NAME).o
 
-distclean:
-	$(SETUP) -distclean $(DISTCLEANFLAGS)
+fclean: clean
+	rm -f $(NAME)
+	rm -f $(NAME).opt
+	rm -f $(NAME).byt
 
-setup.data:
-	$(SETUP) -configure $(CONFIGUREFLAGS)
+depend: .depend
 
-configure:
-	$(SETUP) -configure $(CONFIGUREFLAGS)
+.depend:
+	$(CAMLDEP) -I src $(SOURCES) > .depend
 
-.PHONY: build doc test all install uninstall reinstall clean distclean configure
+re: fclean all
 
-# OASIS_STOP
+-include .depend
