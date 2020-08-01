@@ -13,7 +13,9 @@ CFLAGS =
 all: depend $(NAME)
 
 $(NAME): opt byt
+ifeq (,$(wildcard $(NAME)))
 	ln -s $(NAME).byt $(NAME)
+endif
 
 opt: $(NAME).opt
 byt: $(NAME).byt
