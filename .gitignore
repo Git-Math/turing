@@ -7,7 +7,7 @@
 *.cmx
 *.cmxs
 *.cmxa
-turing
+ft_turing
 turing.byt
 turing.opt
 .depend

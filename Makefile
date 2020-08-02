@@ -1,4 +1,4 @@
-NAME = turing
+NAME = ft_turing
 
 SOURCES = src/except.ml src/turing_types.ml src/print.ml src/turing.ml src/main.ml
 DEP = -thread -package core -package yojson -package base -package core_kernel
@@ -12,7 +12,7 @@ CFLAGS =
 
 all: depend $(NAME)
 
-$(NAME): opt byt
+$(NAME): lib opt byt
 ifeq (,$(wildcard $(NAME)))
 	ln -s $(NAME).byt $(NAME)
 endif
@@ -22,6 +22,10 @@ byt: $(NAME).byt
 
 OBJS = $(SOURCES:.ml=.cmo)
 OPTOBJS = $(SOURCES:.ml=.cmx)
+
+lib:
+	opam switch 4.07.0
+	opam install -y ocamlfind ocamlbuild core base yojson
 
 $(NAME).byt: $(OBJS)
 				$(CAMLFIND) $(CAMLC) -o $(NAME).byt -linkpkg $(DEP) $(OBJS)
