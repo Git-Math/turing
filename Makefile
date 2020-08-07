@@ -24,8 +24,10 @@ OBJS = $(SOURCES:.ml=.cmo)
 OPTOBJS = $(SOURCES:.ml=.cmx)
 
 lib:
+ifeq (,$(wildcard $(NAME)))
 	opam switch 4.07.0
 	opam install -y ocamlfind ocamlbuild core base yojson
+endif
 
 $(NAME).byt: $(OBJS)
 				$(CAMLFIND) $(CAMLC) -o $(NAME).byt -linkpkg $(DEP) $(OBJS)
